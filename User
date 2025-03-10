@@ -1,0 +1,68 @@
+package project;
+import java.util.*;
+public class User {
+	private Scanner sc = new Scanner(System.in);
+    private HotelManager hotelManager;
+
+    public User(HotelManager hotelManager) {
+        this.hotelManager = hotelManager;
+    }
+
+    public void menu() {
+        while (true) {
+            System.out.println("\n=========== Hotel Booking System ===========");
+            System.out.println("1️⃣  View room availability");
+            System.out.println("2️⃣  Check availability by date");
+            System.out.println("3️⃣  Book a room");
+            System.out.println("4️⃣  Cancel a booking");
+            System.out.println("5️⃣  View booking history");
+            System.out.println("6️⃣  Exit");
+            System.out.println("==============================================");
+            System.out.print("Enter your choice: ");
+            int choice = sc.nextInt();
+            sc.nextLine(); 
+
+            switch (choice) {
+                case 1 -> hotelManager.displayAvailabilityStatus();
+                case 2 -> {
+                    System.out.print("\nEnter the date of interest (e.g., 15 for 15th April): ");
+                    int date = sc.nextInt();
+                    System.out.println("\n========================");
+                    System.out.println("You have entered: " + date + "th April");
+                    System.out.println("Availability Status: " + hotelManager.checkAvailability(date));
+                    System.out.println("========================");
+                }
+                case 3 -> {
+                    System.out.print("\nEnter your name: ");
+                    String userName = sc.nextLine();
+                    System.out.print("Enter the date you want to book: ");
+                    int date = sc.nextInt();
+                    int price = hotelManager.getRoomPrice(date);
+
+                    if (hotelManager.bookRoom(date, userName)) {
+                        System.out.println("✅ Room booked for " + date + "th April at " + price + " INR!");
+                    } else {
+                        System.out.println("❌ " + date + "th April is already booked!");
+                    }
+                }
+                case 4 -> {
+                    System.out.print("\nEnter your name: ");
+                    String userName = sc.nextLine();
+                    System.out.print("Enter the date you want to cancel: ");
+                    int date = sc.nextInt();
+                    if (hotelManager.cancelBooking(date, userName)) {
+                        System.out.println("✅ Booking canceled for " + date + "th April!");
+                    } else {
+                        System.out.println("❌ No booking found for this date!");
+                    }
+                }
+                case 5 -> hotelManager.displayBookingHistory();
+                case 6 -> {
+                    System.out.println("\nThank you for using the Hotel Booking System! 🏨");
+                    return;
+                }
+                default -> System.out.println("⚠️  Invalid choice. Please try again.");
+            }
+        }
+    }
+}
