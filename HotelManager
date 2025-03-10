@@ -1,0 +1,83 @@
+package project;
+import java.util.*;
+import java.util.concurrent.locks.*;
+import java.time.*;
+
+public class HotelManager {
+    private final TreeMap<Integer, String> roomAvailability = new TreeMap<>();
+    private final TreeMap<Integer, Integer> roomPrices = new TreeMap<>();
+    private final List<String> bookingHistory = Collections.synchronizedList(new ArrayList<>());
+    private final Lock lock = new ReentrantLock(); // Lock for thread safety
+
+    public HotelManager(int startDay, int endDay) {
+        initializeRooms(startDay, endDay);
+    }
+
+    private void initializeRooms(int startDay, int endDay) {
+        for (int i = startDay; i <= endDay; i++) {
+            roomAvailability.put(i, "Available");
+            roomPrices.put(i, calculateRoomPrice(i));
+        }
+    }
+
+    private int calculateRoomPrice(int day) {
+        LocalDate date = LocalDate.of(2024, 4, day);
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+            return 2000; // Higher price on weekends
+        } else {
+            return 1000; // Constant price on weekdays
+        }
+    }
+
+    public void displayAvailabilityStatus() {
+        lock.lock();
+        try {
+            System.out.println("\n========== Room Availability ==========");
+            for (Map.Entry<Integer, String> entry : roomAvailability.entrySet()) {
+                System.out.println("| " + entry.getKey() + "th April | " + entry.getValue() + " | Price: " + roomPrices.get(entry.getKey()) + " INR |");
+            }
+            System.out.println("======================================");
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public synchronized boolean bookRoom(int date, String userName) {
+        if (roomAvailability.getOrDefault(date, "Booked").equals("Available")) {
+            roomAvailability.put(date, "Booked");
+            bookingHistory.add(userName + " booked a room on " + date + "th April for " + roomPrices.get(date) + " INR");
+            return true;
+        }
+        return false;
+    }
+
+    public synchronized boolean cancelBooking(int date, String userName) {
+        if (roomAvailability.getOrDefault(date, "Available").equals("Booked")) {
+            roomAvailability.put(date, "Available");
+            bookingHistory.add(userName + " canceled the booking on " + date + "th April");
+            return true;
+        }
+        return false;
+    }
+
+    public synchronized String checkAvailability(int date) {
+        return roomAvailability.getOrDefault(date, "Invalid date");
+    }
+
+    public synchronized int getRoomPrice(int date) {
+        return roomPrices.getOrDefault(date, -1);
+    }
+
+    public synchronized void displayBookingHistory() {
+        System.out.println("\n========== Booking History ==========");
+        if (bookingHistory.isEmpty()) {
+            System.out.println("No bookings have been made yet.");
+        } else {
+            for (String record : bookingHistory) {
+                System.out.println(record);
+            }
+        }
+        System.out.println("======================================");
+    }
+}
