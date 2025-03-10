@@ -1,0 +1,9 @@
+package project;
+
+public class HotelBookingSystem {
+	 public static void main(String[] args) {
+		 HotelManager hotelManager = new HotelManager(15, 24);
+	        User user = new User(hotelManager);
+	        user.menu();
+	    }
+	}
